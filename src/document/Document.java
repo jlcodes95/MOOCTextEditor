@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 public abstract class Document {
 
 	private String text;
+	private static final String VOWELS = "aeiouyAEIOU";
+	private static final double DOUBLE_CONVERTER = 1.00;
 	
 	/** Create a new document from the given text.
 	 * Because this class is abstract, this is used only from subclasses.
@@ -67,7 +69,28 @@ public abstract class Document {
 		// TODO: Implement this method so that you can call it from the 
 	    // getNumSyllables method in BasicDocument (module 2) and 
 	    // EfficientDocument (module 3).
-	    return 0;
+		int count = 0;
+		int vowelCount = 0;
+		for (char c: word.toCharArray()) {
+			boolean isVowel = VOWELS.indexOf(c) > -1;
+			if (isVowel) {
+				vowelCount++;
+			}else {
+				if (vowelCount > 0) {
+					vowelCount = 0;
+					count++;
+				}
+			}
+		}
+		if (vowelCount == 1 && word.charAt(word.length()-1) != 'e' && word.charAt(word.length()-1) != 'E') {
+			count++;
+		}else if (vowelCount == 1 && count == 0 && (word.charAt(word.length()-1) == 'e' || word.charAt(word.length()-1) == 'E')) {
+			count ++;
+		}else if (vowelCount > 1) {
+			count++;
+		}
+		
+	    return count;
 	}
 	
 	/** A method for testing
@@ -132,7 +155,8 @@ public abstract class Document {
 	{
 	    // TODO: You will play with this method in week 1, and 
 		// then implement it in week 2
-	    return 0.0;
+		int numWords =  getNumWords();
+	    return 206.835 - 1.015 * (numWords * DOUBLE_CONVERTER/getNumSentences()) - 84.6 * (getNumSyllables() * DOUBLE_CONVERTER/numWords);
 	}
 	
 	
