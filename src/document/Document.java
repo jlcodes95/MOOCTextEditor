@@ -12,8 +12,6 @@ import java.util.regex.Pattern;
 public abstract class Document {
 
 	private String text;
-	private static final String VOWELS = "aeiouyAEIOU";
-	private static final double DOUBLE_CONVERTER = 1.00;
 	
 	/** Create a new document from the given text.
 	 * Because this class is abstract, this is used only from subclasses.
@@ -44,53 +42,32 @@ public abstract class Document {
 		return tokens;
 	}
 	
-	/** This is a helper function that returns the number of syllables
-	 * in a word.  You should write this and use it in your 
-	 * BasicDocument class.
-	 * 
-	 * You will probably NOT need to add a countWords or a countSentences 
-	 * method here.  The reason we put countSyllables here because we'll 
-	 * use it again next week when we implement the EfficientDocument class.
-	 * 
-	 * For reasons of efficiency you should not create Matcher or Pattern 
-	 * objects inside this method. Just use a loop to loop through the 
-	 * characters in the string and write your own logic for counting 
-	 * syllables.
-	 * 
-	 * @param word  The word to count the syllables in
-	 * @return The number of syllables in the given word, according to 
-	 * this rule: Each contiguous sequence of one or more vowels is a syllable, 
-	 *       with the following exception: a lone "e" at the end of a word 
-	 *       is not considered a syllable unless the word has no other syllables. 
-	 *       You should consider y a vowel.
-	 */
-	protected int countSyllables(String word)
+	// This is a helper function that returns the number of syllables
+	// in a word.  You should write this and use it in your 
+	// BasicDocument class.
+	protected static int countSyllables(String word)
 	{
-		// TODO: Implement this method so that you can call it from the 
-	    // getNumSyllables method in BasicDocument (module 2) and 
-	    // EfficientDocument (module 3).
-		int count = 0;
-		int vowelCount = 0;
-		for (char c: word.toCharArray()) {
-			boolean isVowel = VOWELS.indexOf(c) > -1;
-			if (isVowel) {
-				vowelCount++;
-			}else {
-				if (vowelCount > 0) {
-					vowelCount = 0;
-					count++;
-				}
+	    //System.out.print("Counting syllables in " + word + "...");
+		int numSyllables = 0;
+		boolean newSyllable = true;
+		String vowels = "aeiouy";
+		char[] cArray = word.toCharArray();
+		for (int i = 0; i < cArray.length; i++)
+		{
+		    if (i == cArray.length-1 && Character.toLowerCase(cArray[i]) == 'e' 
+		    		&& newSyllable && numSyllables > 0) {
+                numSyllables--;
+            }
+		    if (newSyllable && vowels.indexOf(Character.toLowerCase(cArray[i])) >= 0) {
+				newSyllable = false;
+				numSyllables++;
+			}
+			else if (vowels.indexOf(Character.toLowerCase(cArray[i])) < 0) {
+				newSyllable = true;
 			}
 		}
-		if (vowelCount == 1 && word.charAt(word.length()-1) != 'e' && word.charAt(word.length()-1) != 'E') {
-			count++;
-		}else if (vowelCount == 1 && count == 0 && (word.charAt(word.length()-1) == 'e' || word.charAt(word.length()-1) == 'E')) {
-			count ++;
-		}else if (vowelCount > 1) {
-			count++;
-		}
-		
-	    return count;
+		//System.out.println( "found " + numSyllables);
+		return numSyllables;
 	}
 	
 	/** A method for testing
@@ -153,10 +130,10 @@ public abstract class Document {
 	/** return the Flesch readability score of this document */
 	public double getFleschScore()
 	{
-	    // TODO: You will play with this method in week 1, and 
-		// then implement it in week 2
-		int numWords =  getNumWords();
-	    return 206.835 - 1.015 * (numWords * DOUBLE_CONVERTER/getNumSentences()) - 84.6 * (getNumSyllables() * DOUBLE_CONVERTER/numWords);
+		double wordCount = (double)getNumWords();
+		return 206.835 - (1.015 * ((wordCount)/getNumSentences())) 
+				- (84.6 * (((double)getNumSyllables())/wordCount));
+	
 	}
 	
 	
